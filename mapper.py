@@ -6,24 +6,18 @@ PATTERN = r'[^a-zA-Z]+'
 OUTPUT_FILE = '{0}/mapper.output'.format(OUTPUT_DIR)
 
 
-def main():
+def mapper():
     with open(TARGET_FILE, 'r') as f:
         words = f.read()
         clean_words = sub(PATTERN, ' ', words)
-        for word in clean_words.split(' '):
-            map_it (word)
 
-def map_it(word):
-    if len(word) > 0:
-        with open(OUTPUT_FILE, 'a+') as f:
-            string = '{0},{1}\n'.format(len(word), word)
-            f.write(string)
+        output = open(OUTPUT_FILE, 'a+')
+        for word in clean_words.split(' '):
+            if len(word) > 0:
+                string = '{0},{1}\n'.format(len(word), word)
+                output.write(string)
+        
+        output.close()
 
 if __name__ == '__main__':
-    try:
-        # remove output if exists
-        remove(OUTPUT_FILE)
-    except:
-        pass
-
-    main()
+    mapper()
