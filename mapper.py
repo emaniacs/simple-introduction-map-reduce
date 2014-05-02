@@ -1,13 +1,13 @@
-from main import TARGET_FILE, OUTPUT_DIR
 from re import sub
-from os import remove
+
+import config
 
 PATTERN = r'[^a-zA-Z]+'
-OUTPUT_FILE = '{0}/mapper.output'.format(OUTPUT_DIR)
+OUTPUT_FILE = '{0}/mapper.output'.format(config.OUTPUT_DIR)
 
 
 def mapper():
-    with open(TARGET_FILE, 'r') as f:
+    with open(config.TARGET_FILE, 'r') as f:
         words = f.read()
         clean_words = sub(PATTERN, ' ', words)
 
