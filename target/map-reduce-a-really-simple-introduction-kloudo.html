@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)http://ksat.me/map-reduce-a-really-simple-introduction-kloudo/ -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   
+   <title>Map Reduce - A really simple introduction « Kaushik Sathupadi</title>
+   <link href="http://feeds.feedburner.com/ksat" rel="alternate" title="Kaushik Sathupadi" type="application/atom+xml">
+
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="./map-reduce-a-really-simple-introduction-kloudo_files/syntax.css" type="text/css">
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="./map-reduce-a-really-simple-introduction-kloudo_files/screen.css" type="text/css" media="screen, projection">
+   <link href="./map-reduce-a-really-simple-introduction-kloudo_files/css" rel="stylesheet" type="text/css"> 
+
+<style type="text/css"></style><style type="text/css"></style><script type="text/javascript" async="" src="./map-reduce-a-really-simple-introduction-kloudo_files/ga.js" class="disconnect-collapsed"></script><script type="text/javascript" async="" src="./map-reduce-a-really-simple-introduction-kloudo_files/embed.js"></script><script id="H8d6tphuU400sbUxwm6oK7" type="text/javascript" src="./map-reduce-a-really-simple-introduction-kloudo_files/sf_main.jsp"></script><script id="Z2o7T3xDLT1QjIBAlvh2zV" type="text/javascript" src="./map-reduce-a-really-simple-introduction-kloudo_files/javascript.js"></script><script type="text/javascript" src="./map-reduce-a-really-simple-introduction-kloudo_files/sf_preloader.jsp"></script><script src="./map-reduce-a-really-simple-introduction-kloudo_files/opt_content.js"></script><script type="text/javascript" src="./map-reduce-a-really-simple-introduction-kloudo_files/sf_code.jsp"></script><script type="text/javascript" src="./map-reduce-a-really-simple-introduction-kloudo_files/base_single_icon.js"></script><link rel="stylesheet" href="http://www.superfish.com/ws/css/main.css?v=13.1.3.15"><script src="./map-reduce-a-really-simple-introduction-kloudo_files/alfie.f51946af45e0b561c60f768335c9eb79.js" async="" charset="UTF-8"></script><script type="text/javascript" src="./map-reduce-a-really-simple-introduction-kloudo_files/get.jsp"></script><script src="./map-reduce-a-really-simple-introduction-kloudo_files/ngram_id_dict.json" id="SF_ngram_call" type="text/javascript"></script></head>
+<body style="">
+
+
+<div class="site">
+  <div class="title">
+    <a href="http://ksat.me/">Kaushik Sathupadi</a>
+    <div class="description">
+      Programmer. Creator. Co-Founder.  Dad.
+    </div>
+  </div>
+  
+  <div id="post">
+<div style="padding-bottom:20px; text-align:right;">
+	<a href="http://ksat.me/">See all my projects and blogs →	</a>
+</div>
+
+<h1>Map Reduce: A really simple introduction</h1>
+<p>Ever since google <a href="http://labs.google.com/papers/mapreduce.html">published</a> its research paper on map reduce, you have been hearing about it. Here and there. If you have uptil  now considered map-reduce a mysterious buzzword, and ignored it, Know that its not. The basic concept is really very simple. and in this tutorial I try to explain it in the simplest way that I can. Note that I have intentionally missed out some deeper details to make it really friendly to a beginner.<br>
+&nbsp;</p>
+<h2>Chapter 1: Your CEO’s Strange itch:</h2>
+<p>Imagine this. You work in a really big company. Your company is planning to launch the next big “Blogging platform”. Tommorow morning you go to your office and there’s a mail from your <span class="caps">CEO</span> regarding a new work:</p>
+<pre>Dear  &lt;Your Name&gt;,
+ As you know we are building the blogging platform blogger2.com, I need some statistics. I need to find out, Acorss all blogs ever wrriten on blogger.com, how many times 1 character words occur(like 'a', 'I'), How many times two character words occur (like 'be', 'is').. and so on till how many times do ten character words occur.
+
+ I know its a really big job. So, I will assign, all 50,000 employees working in our company to work with you on this for a week.  I am going on a vacation for a week, and its really important that I've this when I return. Good luck.
+
+regds,
+The CEO
+
+P.s : and one more thing. Everything has to be done manually, except going to the blog and copy pasting it on notepad. I read somewhere that if you write programs, google can find out about it
+</pre>
+<p>Picture yourself in that position for a moment. You have 50,000 people to work for you for a week. And you need to find out the number of 1 character words, No. of 2 character words etc., covering the maximum number of blogs in blogspot. Finally you need to give a report to your <span class="caps">CEO</span> with something like this:</p>
+<ul>
+	<li>Occurance of one character words – Around 937688399933</li>
+	<li>Occurance of two chracter words – Around 23388383830753434</li>
+	<li>.. hence forth till 10</li>
+</ul>
+<p>If homicide, suicide or resigining the job is not an option, how would you solve it? How would you avoid the chaos of so many people working. How will you co-ordinate those many since the output of one has to be merged with another?</p>
+<p>You decide to take leave for the day, go home, sleep over it, and the next day wake up with the greatest Idea ever. “S**t! i wasted a day!”<br>
+&nbsp;</p>
+<h2>Chapter 2: Your proclamation: Let there be caste</h2>
+<p>The next day, You stand with a mike on the dias before 50,000 and proclaim. For a week, you will all be divided into many groups:</p>
+<ul>
+	<li>The Mappers (tens of Thousands of people will be in this group)</li>
+	<li>The Grouper (Assume just one guy for now)</li>
+	<li>The Reducers( Around 10 of em.) and..</li>
+	<li>The Master(That’s you).</li>
+</ul>
+<p>Then you talk to each one of the groups.<br>
+&nbsp;</p>
+<h2>Chapter 3: Your talk with The Mappers</h2>
+<p>Each mapper will get a set of 50 blog urls and really Big sheet of paper. Each one of you need to go to each of that url. and for each word in those blogs, write one line on the paper. The format of that line should be the number of characters in the word, then a commna, and then the actual word.</p>
+<p>For example, if you find the word “a”, you write “1,a”, in a new line in your paper. since the word “a” has only 1 character.  If you find the word “hello”, you write “5,hello” on the new line.</p>
+<p>Each take 4 days. So, After 4 days, your sheet might look like this</p>
+<ul>
+	<li>“1,a”</li>
+	<li>“5,hello”</li>
+	<li>“2,if”</li>
+	<li>.. and a million more lines</li>
+</ul>
+<p><strong>At the end of the 4th day.  each one of you will give your sheet completely filled to the Grouper</strong><br>
+&nbsp;</p>
+<h2>Chapter 4: Your talk with the Grouper</h2>
+<p>I will give you 10 papers. The first paper will be marked 1, the second paper will be marked 2, and so on, till 10.</p>
+<p>You collect the output from mappers and for each line in the mapper’s sheet, if it says “1,<something>”, your write the <something> on sheet 1, if it says “2, <something>”, you write it on sheet two.</something></something></something></p>
+<p><strong>For example, if the first line of a mapper’s sheet says “1,a”, you write “a” on sheet 1. if it says “2,if”, your write “if” on sheet 2. If it says “5,hello”, you write hello on sheet 5.</strong></p>
+<p>So at the end of your work, the 10 sheets you have might look like this</p>
+<ul>
+	<li>Sheet 1: a, a ,a , I, I , i, a, i, i, i…. millions more</li>
+	<li>Sheet 2: if, of, it, of, of, if, at, im, is,is, of, of … millions more</li>
+	<li>Sheet 3 :the, the, and, for, met, bet, the, the, and, … millions more</li>
+	<li>..</li>
+	<li>Sheet 10: ……</li>
+</ul>
+<p><strong>once you are done, you distribute, each sheet to one reducer. For example sheet 1 goes to reducer 1, sheet 2 goes to reducer 2 and so on.</strong><br>
+&nbsp;</p>
+<h2>Chapter 5: Your talk with the Reducers:</h2>
+<p>Each one of you gets one sheet from the grouper. for each sheet you count the number of words written on it and write it in big bold letters on the back side of the paper.</p>
+<p>For ex, if you are reducer 2. You get sheet 2 from the grouper that looks like this:<br>
+“Sheet 2: if, of, it, of, of, if, at, im, is,is, of, of …”</p>
+<p><strong>You count the number of words on that sheet, say the number of words is 28838380044, You write it on the back side of the paper , in big bold letters and give it to me(the master).</strong><br>
+&nbsp;</p>
+<h2>Chapter 6: The controlled Chaos and the climax:</h2>
+<p>At the end of this process you have 10 sheets, Sheet 1, having the count of the number of words with 1 character on the back side.  Sheet2, having the count of the number words with 2 characetrs on the back side. You did it. Genius.</p>
+<p>You essentially did map reduce. The greatest advantage in your approach was this</p>
+<ul>
+	<li>The mappers can work independently</li>
+	<li>The reducers can work independently</li>
+	<li>The Grouper can work really fast, because, he din’t have to do any counting of words, all the had to do was to look at the first number and put that word in the appropriate sheet.</li>
+</ul>
+<p>The process can be easily applied to other kinds of problems.  In such a case :</p>
+<ul>
+	<li>The work of the Master(dividing the work) and the Grouper(Grouping the values by key[the value before commna]), remains the same. This is what any map-reduce library provides.</li>
+	<li>The work of the mappers and reducers differ according to the problem. This is what you should write.</li>
+</ul>
+<p>You can optimize this a little bit. And I am skipping those. For example, you don’t even have to mention the words, every where, you could have just written down “x”, instead of the actual word, since in the end, we are just counting. And everything need not happen in a sequence like First Mapper, the Grouper and then reducer. Moreover, one person can be sometime do the job of a mapper and some other time the job of a grouper. Give all this a thought and you will get more answers.</p>
+<p>So You solve the biggest challenge ever posed to you. After a week You collect the sheet of papers from the reducers. The back side of sheet 1 will have the number of occurences of words with 1 character. The back side of sheet 2 will have the number of occurances of words with 2 characters and so on..</p>
+<p>You put this information in a excel, Take a printout in a neat sheet of paper and take it to your <span class="caps">CEO</span> with a big smile. “Good job “, he says, “put it on the desk, I will take a look at it in a month” :)</p>
+
+<div style="padding-top:15px">
+    <a href="http://twitter.com/share" class="twitter-share-button" data-count="none" data-via="_ksat">Tweet</a><script type="text/javascript" src="./map-reduce-a-really-simple-introduction-kloudo_files/widgets.js" class="disconnect-collapsed"></script>
+  </div> 
+</div>
+<div style="padding-top:5px; font-size:11px; font-weight:bold;">
+    Post by Kaushik Sathupadi, Founder <a href="http://www.cull.io/">Cull.io</a> - A platform to recruit web developers by having them develop a web application
+</div>
+
+
+<div style="height:5px;margin-top:20px; border-top:1px dashed #ccc">&nbsp;</div>
+<div id="disqus_thread"><iframe id="dsq-2" data-disqus-uid="2" allowtransparency="true" frameborder="0" tabindex="0" title="Disqus" width="100%" src="./map-reduce-a-really-simple-introduction-kloudo_files/saved_resource.html" style="width: 100% !important; border: none !important; overflow: hidden !important; height: 5913px !important;" scrolling="no" horizontalscrolling="no" verticalscrolling="no"></iframe><iframe id="dsq-indicator-north" data-disqus-uid="indicator-north" allowtransparency="true" frameborder="0" tabindex="0" title="Disqus" scrolling="no" style="width: 800px !important; border: none !important; overflow: hidden !important; top: 0px !important; min-width: 800px !important; max-width: 800px !important; position: fixed !important; z-index: 2147483646 !important; height: 29px !important; min-height: 29px !important; max-height: 29px !important; display: none !important;"></iframe><iframe id="dsq-indicator-south" data-disqus-uid="indicator-south" allowtransparency="true" frameborder="0" tabindex="0" title="Disqus" scrolling="no" style="width: 800px !important; border: none !important; overflow: hidden !important; bottom: 0px !important; min-width: 800px !important; max-width: 800px !important; position: fixed !important; z-index: 2147483646 !important; height: 29px !important; min-height: 29px !important; max-height: 29px !important; display: none !important;"></iframe></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'kaushiksathupadi'; // required: replace example with your forum shortname
+    //var disqus_url = 'http://ksat.me/map-reduce-a-really-simple-introduction-kloudo/';
+   
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the &lt;a href="http://disqus.com/?ref_noscript"&gt;comments powered by Disqus.&lt;/a&gt;</noscript>
+
+  
+  <div class="footer">
+    Copyright © Kaushik Sathupadi 2009 - 2012
+
+    <!--
+    <div class="contact">
+      <p>
+        <a href="http://flickr.com/photos/mojombo/">flickr.com/photos/mojombo</a>
+      </p>
+    </div>
+    <div class="rss">
+      <a href="http://feeds.feedburner.com/ksat">
+        <img src="/images/rss.png" alt="Subscribe to RSS Feed" />
+      </a>
+    </div>
+     -->
+  </div>
+</div>
+<!--
+<a href="http://github.com/mojombo"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+-->
+
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18360645-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<!-- Google Analytics end -->
+
+
+
+<iframe src="./map-reduce-a-really-simple-introduction-kloudo_files/userData.html" style="position: absolute; top: -100px; left: -100px; z-index: -10; border: none; visibility: hidden; width: 1px; height: 1px;"></iframe><div id="dp_swf_engine" style="position: absolute; width: 1px; height: 1px;"><embed style="width: 1px; height: 1px;" type="application/x-shockwave-flash" src="http://www.ajaxcdn.org/swf.swf" width="1" height="1" id="_dp_swf_engine" name="_dp_swf_engine" bgcolor="#336699" quality="high" allowscriptaccess="always"></div><iframe style="position: absolute; width: 1px; height: 1px; top: 0px; left: 0px; visibility: hidden;"></iframe><sfmsg id="sfMsgId" data="{&quot;imageCount&quot;:0,&quot;ip&quot;:&quot;1.1.1.1&quot;}"></sfmsg></body></html>
